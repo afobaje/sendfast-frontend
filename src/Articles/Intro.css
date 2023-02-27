@@ -1,0 +1,18 @@
+.stop{
+
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.think{
+    background-image:linear-gradient(to right, red, blue);
+    -webkit-background-composite: padding;
+}
+
+.develop{
+    background-image: linear-gradient(to left, green, blue);
+}
+.make{
+    background-image: linear-gradient(to bottom, blue,rgba(219, 80, 112, 0.752));
+}

@@ -1,0 +1,24 @@
+@font-face {
+  font-family: Atkinson;
+  src: url(./assets/Atkinson/AtkinsonHyperlegible-Regular.ttf);
+}
+@font-face {
+  font-family: Cerebri Sans;
+  src: url(./assets/Cerebri.Sans.Pro/CerebriSansPro-Regular.ttf) format('truetype');
+  font-weight: normal;
+}
+@font-face {
+  font-family: Cerbri Sans;
+  src: url(./assets/Cerebri.Sans.Pro/CerebriSansPro-Light.ttf) format('truetype');
+  font-weight: lighter;
+}
+
+.App{
+  min-height: 200vh;
+  
+}
+*{
+  font-family:Cerebri Sans, Arial, Helvetica, sans-serif;
+  font-weight: lighter;
+
+}
