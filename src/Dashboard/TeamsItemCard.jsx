@@ -55,21 +55,52 @@ export default function TeamsItemCard({
 
   function JoinRoom(id) {
     socket.emit("createroom", id);
-    projectParticipants.map((val) => {
-      if (val == authenticated.uid) {
-        return;
-      } else {
-        const data = {
-          projectParticipants: projectParticipants
-            ? [...projectParticipants, authenticated.uid]
-            : [],
-        };
-        const docRef = doc(db, "projects", id);
-        updateDoc(docRef, data)
-          .then((ref) => console.log("successfully updated", ref))
-          .catch((err) => console.log("ran into a server error", err));
-      }
-    });
+    console.log(projectParticipants, "whats happening");
+    // projectParticipants.length>0?projectParticipants.map((val) => {
+    //   if (val == authenticated.uid) {
+    //     return;
+    //   } else {
+    //     const data = {
+    //       projectParticipants: projectParticipants
+    //         ? [...projectParticipants, authenticated.uid]
+    //         : [],
+    //     };
+    //     const docRef = doc(db, "projects", id);
+    //     updateDoc(docRef, data)
+    //       .then((ref) => console.log("successfully updated", ref))
+    //       .catch((err) => console.log("ran into a server error", err));
+    //   }
+    // }):
+
+    let group;
+    if (projectParticipants.length > 0) {
+      projectParticipants.map((val) => {
+        if (val == authenticated.uid) {
+          console.log(val, "culprit");
+          return;
+        } else {
+          console.log("to be added");
+          const data = {
+            projectParticipants: projectParticipants
+              ? [...projectParticipants, authenticated.uid]
+              : [],
+          };
+          const docRef = doc(db, "projects", id);
+          updateDoc(docRef, data)
+            .then((ref) => console.log("successfully updated", ref))
+            .catch((err) => console.log("ran into a server error", err));
+        }
+      });
+    } else {
+      group = [authenticated.uid];
+      const data = {
+        projectParticipants: group,
+      };
+      const docRef = doc(db, "projects", id);
+      updateDoc(docRef, data)
+        .then((ref) => console.log("successfully updated", ref))
+        .catch((err) => console.log("ran into a server error", err));
+    }
   }
 
   function enterRoom(id) {
