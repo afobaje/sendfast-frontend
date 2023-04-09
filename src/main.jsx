@@ -9,21 +9,25 @@ import StoreContext from "./Context/StoreContext";
 import SocketContext from "./Context/SocketContext";
 import CommentContext from "./Context/CommentContext";
 import RoomContext from "./Context/roomContext";
+import Users from "./Context/Users";
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthContext>
-      <StoreContext>
-        <SocketContext>
-          <CommentContext>
-            <RoomContext>
-              <ChakraProvider>
-                <RouterProvider router={router} />
-              </ChakraProvider>
-            </RoomContext>
-          </CommentContext>
-        </SocketContext>
-      </StoreContext>
-    </AuthContext>
+      <Users>
+        <AuthContext>
+          <StoreContext>
+            <SocketContext>
+              <CommentContext>
+                <RoomContext>
+                  <ChakraProvider>
+                    <RouterProvider  router={router} />
+                  </ChakraProvider>
+                </RoomContext>
+              </CommentContext>
+            </SocketContext>
+          </StoreContext>
+        </AuthContext>
+      </Users>
   </React.StrictMode>
 );

@@ -18,7 +18,7 @@ export default function useSocket() {
       socket.off("connect");
       socket.off("disconnect");
     };
-  }, [socket.isConnected,isConnected]);
+  }, [isConnected]);
 
   if (isConnected === false) {
     return isConnected;

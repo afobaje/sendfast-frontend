@@ -10,7 +10,7 @@ export default function Errorpage() {
         <Center>
             <h1>Unexpected error</h1>
             <Text>
-                <i>{error.statusText||error.message}</i>
+                <p>{error.statusText||error.message}</p>
             </Text>
         </Center>
     </Flex>

@@ -1,46 +1,53 @@
 import {
-  Box,
   Button,
+  Circle,
   Flex,
   Heading,
   HStack,
   Input,
-  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import axios from "axios";
 import React from "react";
 import { useContext } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Socket } from "../Context/SocketContext";
+import { userContext } from "../Context/Users";
 import Layout from "../Layout/Layout";
 
 export default function Chat() {
+  const navigate = useNavigate();
   const socket = useContext(Socket);
-  const [text, setText] = useState("");
-  const [info, setInfo] = useState();
   const [blob, setBlob] = useState(null);
-
-  let [data, setData] = useState("");
-  const [arr, setArr] = useState([]);
   const [user, setUser] = useState("");
+  const { usersList, setUsersList } = useContext(userContext);
 
   let handleUser = (e) => setUser(e.target.value);
 
   useEffect(() => {
-    socket.on("onMessage", (res) => {
-      setArr([...arr, res]);
-      console.log(arr);
-    });
+    function addItem(res) {
+      if (usersList.length > 0) {
+        for (const iterator of usersList) {
+          if (iterator.uid == res.uid) {
+            return null;
+          }
+        }
+        return setUsersList([...usersList, res]);
+      } else if (usersList.length == 0) {
+        return setUsersList([...usersList, res]);
+      }
+    }
 
-    socket.on("info", (res) => {
-      console.log("info available", res);
-      setInfo(res);
-    });
-  }, [arr, info]);
+    socket.on("info", addItem);
+    localStorage.setItem("userList", JSON.stringify(usersList));
+    return () => {
+      socket.off("info", addItem);
+    };
+  }, [usersList]);
 
+  /// maintaining this function to add to chat functionality of receiving and sending files
   function fileReader(e) {
     let files = e.target.files;
     let [file] = files;
@@ -61,96 +68,84 @@ export default function Chat() {
     setUser("");
   }
 
-  // async function searchUser(email) {
-  //   axios
-  //     .post("http://localhost:3000/user", {
-  //       email,
-  //     })
-  //     .then((res) => {
-  //       console.log(res);
-  //       setData(res.data);
-  //     })
-  //     .catch((err) => console.error(err));
-  //   setUser("");
-  // }
+  function handleChatRoom(res) {
+    socket.emit("room", res);
+    navigate(`/chat/${res}`);
+  }
+
+  // function to check unique objects only in an array
+  function uniqueArr(res) {
+    return res.filter(
+      (obj, index, self) =>
+        index ===
+        self.findIndex((t) => t.uid === obj.uid && t.email === obj.email)
+    );
+  }
 
   return (
     <Layout>
-      {/* <div className="flex flex-col">
-        <div>
-          <input
-            type="text"
-            name=""
-            id=""
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-            }}
-          />
-          <button
-            onClick={() => {
-              socket.emit("event", text);
-              setText("");
-            }}
-          >
-            send
-          </button>
-
-          <ul className="ml-10">
-            {arr.map((val, i) => {
-              return <li key={i}>{val.content}</li>;
-            })}
-          </ul>
-        </div>
-        <div>this is our status {socket.connected ? "connected" : "disconnected"}</div>
-
-        <div>
-          <input
-            type="file"
-            name=""
-            className="p-6 bg-blue-300 shadow-lg"
-            id=""
-            multiple
-            onChange={(e) => fileReader(e)}
-          />
-          <button className="space-y-16 mt-3 bg-red-500">submit</button>
-          <div>{blob && <img src={blob} width="1000" height="1000" />}</div>
-        </div>
-
-        <h1 className="font-bold  text-xl">Welcome, {socket.id}</h1>
-      </div> */}
-
       <Flex flexDir="column" minH="60vh">
-        <HStack w="3xl">
+        <HStack w={{ md: "3xl" }} m="auto">
           <Input value={user} type="email" onChange={(e) => handleUser(e)} />
           <Button onClick={() => searchUser(user)}>Search User</Button>
         </HStack>
-        <Flex
-          flexDir="column"
-          h="full"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Heading>Start a chat with anyone in simple steps</Heading>
-          <Text>Search for a user with their mail</Text>
-          <Text>Start a chat with your friend</Text>
-          <Text>
-            Please note that this chat does not persist across your other
-            devices
-          </Text>
-          <Box>
-          {info ? (
-              <div>
-                <p>hello world</p>
-                <img src={info.photoURL} loading='lazy' alt="profile" />{" "}
-              </div>
+        <Flex w="80vw" m="auto" h="70vh" overflowY="auto" mt="10">
+          <VStack
+            w={{ base: "full", md: "350px" }}
+            display="flex"
+            flexShrink="0"
+          >
+            {usersList.length > 0 ? (
+              usersList.map(({ photoURL, uid, displayName }, i) => {
+                return (
+                  <Flex
+                    key={i}
+                    w="full"
+                    p="5"
+                    border="2px"
+                    borderStyle="none"
+                    borderBottomStyle="solid"
+                    mt="0"
+                    justifyContent="flex-start"
+                    borderBottomColor="blackAlpha.300"
+                    _hover={{ cursor: "pointer", backgroundColor: "#ebeaea" }}
+                    onClick={() => handleChatRoom(uid)}
+                  >
+                    <Circle size="40px" mr="3">
+                      <img
+                        src={photoURL}
+                        className="w-full h-full rounded-full"
+                        alt=""
+                      />
+                    </Circle>
+                    <p className="font-bold text-lg mt-2">
+                      {displayName.toUpperCase()}
+                    </p>
+                  </Flex>
+                );
+              })
             ) : (
-              <p>We've got nothing to display yet</p>
+              <p>no users found</p>
             )}
-          </Box>
-          <Text>
-            hwy borhter
-          </Text>
+          </VStack>
+          <VStack display={{ base: "none", md: "flex" }}>
+            <Flex
+              flexDir="column"
+              h="full"
+              alignItems="center"
+              justifyContent="space-evenly"
+            >
+              <Flex flexDir="column" alignItems="center">
+                <Heading ml="50px">
+                  Start a chat with anyone in simple steps
+                </Heading>
+                <Text>Search for a user with their mail</Text>
+                <Button background="blue.300" color="white" borderRadius="5px">
+                  Send a message
+                </Button>
+              </Flex>
+            </Flex>
+          </VStack>
         </Flex>
       </Flex>
     </Layout>

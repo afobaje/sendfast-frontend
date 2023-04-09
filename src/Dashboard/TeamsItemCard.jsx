@@ -11,21 +11,81 @@ import {
   CardBody,
   HStack,
   ButtonGroup,
+  CircularProgress,
+  CircularProgressLabel,
 } from "@chakra-ui/react";
-import React, { useContext } from "react";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { app } from "../Authconfig/Auth";
+import { Authorized } from "../Context/AuthContext";
 import { Socket } from "../Context/SocketContext";
 
-export default function TeamsItemCard({ name, projCategory, projDesc, id }) {
+export default function TeamsItemCard({
+  name,
+  projCategory,
+  projDesc,
+  projectParticipants,
+  projectComment,
+  projectAttendees,
+  id,
+}) {
   let navigate = useNavigate();
   let socket = useContext(Socket);
+  let { authenticated } = useContext(Authorized);
+  let [joined, setJoined] = useState(false);
+
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    function progressValue(res = 0, total = 10) {
+      let val = (res / total) * 100;
+      setProgress(val);
+    }
+    progressValue(projectParticipants?.length, projectAttendees);
+
+    projectParticipants.map((val) => {
+      if (val == authenticated.uid) {
+        setJoined(true);
+      }
+    });
+  });
+
+  const db = getFirestore(app);
 
   function JoinRoom(id) {
     socket.emit("createroom", id);
+    projectParticipants.map((val) => {
+      if (val == authenticated.uid) {
+        return;
+      } else {
+        const data = {
+          projectParticipants: projectParticipants
+            ? [...projectParticipants, authenticated.uid]
+            : [],
+        };
+        const docRef = doc(db, "projects", id);
+        updateDoc(docRef, data)
+          .then((ref) => console.log("successfully updated", ref))
+          .catch((err) => console.log("ran into a server error", err));
+        console.log(authenticated.uid, "user info");
+      }
+    });
+  }
+
+  function enterRoom(id) {
+    socket.emit("createroom", id);
+    navigate(`/status/${id}`);
   }
 
   return (
-    <Card mb="1" variant="outline" onClick={() => navigate(`/status/${id}`)}>
+    <Card
+      w="full"
+      mb="1"
+      variant="outline"
+      _hover={{ cursor: "pointer", backgroundColor: "#eae6eb8c" }}
+      onClick={() => enterRoom(id)}
+      // onClick={() => navigate(`/status/${id}`)}
+    >
       <CardHeader>
         <Flex ml="2rem" justifyContent="space-between">
           <div>
@@ -40,6 +100,7 @@ export default function TeamsItemCard({ name, projCategory, projDesc, id }) {
                 >
                   {name}
                 </Heading>
+
                 <Text mt="2">38m</Text>
               </Flex>
               <Text
@@ -62,9 +123,11 @@ export default function TeamsItemCard({ name, projCategory, projDesc, id }) {
                 e.stopPropagation();
                 JoinRoom(id);
               }}
-              bg="green.200"
+              bg="green.400"
+              textColor="white"
+              disabled={joined}
             >
-              JOIN
+              {joined ? "JOINED" : "JOIN"}
             </Button>
           </Box>
         </Flex>
@@ -73,12 +136,21 @@ export default function TeamsItemCard({ name, projCategory, projDesc, id }) {
       <CardBody>
         <VStack>
           <div>
-            <Text>{projDesc}</Text>
+            <Text fontSize="16px">{projDesc}</Text>
           </div>
           <HStack>
-            <Text>3/10</Text>
+            {progress > 0 && (
+              <CircularProgress value={progress} color="green.400">
+                <CircularProgressLabel fontSize="16px">
+                  {Math.round(progress)}
+                </CircularProgressLabel>
+              </CircularProgress>
+            )}
           </HStack>
           <ButtonGroup justifyContent="space-evenly">
+            <Button>
+              Comment({projectComment ? projectComment.length : 0})
+            </Button>
             <Button>Like</Button>
             <Button>Bookmark</Button>
           </ButtonGroup>

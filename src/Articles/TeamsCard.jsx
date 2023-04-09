@@ -32,7 +32,10 @@ let teams = [
 
 export default function TeamsCard() {
   return (
-    <Card width="50rem" bg="#263238" userSelect="none">
+    <Card
+    maxWidth='50rem'
+    //  width="50rem" 
+     bg="#263238" userSelect="none">
       <CardHeader bg="#2f343a" borderRadius="2xl">
         <Flex direction="row">
           <HStack>

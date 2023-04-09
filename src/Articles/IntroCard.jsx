@@ -1,7 +1,6 @@
 import React from 'react'
 import { Card,CardHeader,Flex,Heading,CardBody,Text } from '@chakra-ui/react'
-import { useLayoutEffect } from 'react'
-import gsap from 'gsap'
+
 
 export default function IntroCard() {
 
@@ -11,6 +10,7 @@ export default function IntroCard() {
     bg="#1a102d"
     borderRadius="3rem"
     userSelect='none'
+    
     h="full"
     className=" -rotate-12  bg-slate-700 text-white "
   >

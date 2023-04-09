@@ -9,13 +9,19 @@ import Status from "../Dashboard/Status";
 import Errorpage from "../Errorpage";
 import Layout from "../Layout/Layout";
 import Chat from "../Utils/Chat";
+import Inbox from "../Utils/Inbox";
 import ProtectedRoute from "./ProtectedRoute";
+import Profile from "../Profile/Profile";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     errorElement: <Errorpage />,
+  },
+  {
+    path:'profile',
+    element:<Profile/>
   },
   {
     path: "signup",
@@ -27,7 +33,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "chat",
-    element: <Chat />,
+    element: (
+      <ProtectedRoute>
+        <Chat />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "teams",
@@ -58,8 +68,12 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path:'status/:projectId',
-    element:<Status/>
+    path: "status/:projectId",
+    element: <Status />,
+  },
+  {
+    path: "chat/:room",
+    element: <Inbox />,
   },
   {
     path: "*",

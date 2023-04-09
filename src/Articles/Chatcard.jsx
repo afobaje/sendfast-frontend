@@ -6,8 +6,9 @@ export default function Chatcard() {
     <Card
       p="10px"
       direction="column"
-      w="700px"
-      maxW="900px"
+      // w="700px"
+      // maxW="900px"
+      w={{lg:'700px'}}
       background="blackAlpha.50"
       userSelect="none"
     >

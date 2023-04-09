@@ -15,6 +15,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Progress,
   Stack,
   Text,
   Textarea,
@@ -30,51 +31,101 @@ import { TfiComment } from "react-icons/tfi";
 import { BsBookmark } from "react-icons/bs";
 import { FcLike } from "react-icons/fc";
 import { BsShare } from "react-icons/bs";
-import { Comment } from "../Context/CommentContext";
 import { useEffect } from "react";
 import { Socket } from "../Context/SocketContext";
 import { RoomcontextId } from "../Context/roomContext";
+import { Authorized } from "../Context/AuthContext";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import { app } from "../Authconfig/Auth";
+import CommentCard from "./CommentCard";
 
 export default function Status() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { projectId } = useParams();
   const [item] = useContext(Store).filter((val) => val.id === projectId);
   const navigate = useNavigate();
-  const { comment, setComment } = useContext(Comment);
+  const [comment, setComment] = useState(() => {
+    return item?.projectComment ? item.projectComment : [];
+  });
   const socket = useContext(Socket);
   const { room } = useContext(RoomcontextId);
-  let [roomMsg, setroomMsg] = useState({
+  const { authenticated } = useContext(Authorized);
+  const [roomMsg, setroomMsg] = useState({
     projectMsg: "",
-    projectName: "",
-    userId: "",
+    projectName: projectId,
+    userId: {
+      name: authenticated?.displayName,
+      photo: authenticated?.photoURL,
+      id: authenticated?.uid,
+    },
   });
-  const [stateOfRoom, setStateOfRoom] = useState([]);
-  useEffect(() => {
-    socket.on("msgToRoom", (res) => setComment([...comment, res]));
 
+  const [joined, setJoined] = useState(false);
+
+  const [progress, setProgress] = useState(0);
+  const [stateOfRoom, setStateOfRoom] = useState([]);
+  const db = getFirestore(app);
+  useEffect(() => {
+    async function roomMsg(res) {
+      setComment([...comment, res]);
+      const docRef = doc(db, "projects", item.id);
+      const data = { projectComment: comment };
+
+      await updateDoc(docRef, data)
+        .then((ref) => console.log("succesfully updated", ref))
+        .catch((err) => console.log("ran into system error", err));
+    }
+
+    socket.on("msgToRoom", roomMsg);
+    function progressValue(res = 0, total = 10) {
+      let val = (res / total) * 100;
+      setProgress(val);
+    }
+    progressValue(item.projectParticipants?.length, item.projectAttendees);
     setStateOfRoom(room.filter((val) => val == projectId));
-  }, [comment]);
+
+    item.projectParticipants.map((val) => {
+      if (val == authenticated.uid) {
+        setJoined(true);
+      }
+    });
+    return () => {
+      socket.off("msgToRoom", roomMsg);
+    };
+  }, [comment, progress,joined]);
 
   let handleProjectMsg = (e) =>
     setroomMsg({
-      projectName: projectId,
+      ...roomMsg,
       projectMsg: e.target.value,
-      userId: socket.id,
     });
 
   function sendMessages(val) {
     socket.emit("roomMsg", val);
     setroomMsg({
+      ...roomMsg,
       projectMsg: "",
-      projectName: "",
-      userId: "",
     });
     onClose();
   }
 
+  const leaveRoom = () => {
+    let another = item.projectParticipants.filter(
+      (val) => val.id == authenticated.uid
+    );
+    const data = {
+      projectParticipants: another,
+    };
+    const docRef = doc(db, "projects", item.id);
+    updateDoc(docRef, data)
+      .then((ref) => console.log("successfully updated", ref))
+      .catch((err) => console.log("another server error", err));
+    
+  };
+
   return (
     <DashboardLayout>
-      <Flex flexDir="column" mt="2">
+      <Flex flexDir="column" mt="2" w="full">
         <HStack mb="4">
           <IconButton p="4" onClick={() => navigate(-1)}>
             <Icon as={MdKeyboardBackspace} />
@@ -112,9 +163,22 @@ export default function Status() {
                 </Flex>
               </Stack>
               <Box>
-                <Button bg="green.200">
-                  {stateOfRoom.length > 0 ? "JOINED" : "JOIN"}
-                </Button>
+                {joined?<button
+                  onClick={leaveRoom}
+                  className={`text-white py-2 px-4 rounded-lg font-bold ${
+                    stateOfRoom.length > 0 ? "bg-red-300" : "bg-green-300"
+                  }`}
+                >
+                  LEAVE
+                </button>:''}
+                {/* <button
+                  onClick={leaveRoom}
+                  className={`text-white py-2 px-4 rounded-lg font-bold ${
+                    stateOfRoom.length > 0 ? "bg-red-300" : "bg-green-300"
+                  }`}
+                >
+                  {joined ? "LEAVE" : "JOIN"}
+                </button> */}
               </Box>
             </Flex>
           </Stack>
@@ -123,9 +187,6 @@ export default function Status() {
               <Stack>
                 <Text>{item?.projectDesc}</Text>
               </Stack>
-              <HStack>
-                <Text>3/10 Project capacity full</Text>
-              </HStack>
               <Divider />
               <ButtonGroup w="full" justifyContent="space-evenly">
                 <IconButton bg="transparent" onClick={onOpen}>
@@ -141,6 +202,18 @@ export default function Status() {
                   <Icon as={BsShare} />
                 </IconButton>
               </ButtonGroup>
+              <HStack w="full">
+                <Progress
+                  w="80%"
+                  hasStripe
+                  m="auto"
+                  size="lg"
+                  colorScheme="green"
+                  borderRadius="15px"
+                  value={progress}
+                />
+              </HStack>
+              <Divider />
               <Modal size="lg" isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
@@ -172,22 +245,20 @@ export default function Status() {
           </Stack>
         </Stack>
         <VStack>
-          <Text>Comments</Text>
-          {comment.map(({ projectMsg, userId }, i) => (
-            <Box
-              flexDir="column"
-              alignItems="flex-start"
-              border="1px solid #939393"
-              mt="0"
-              p="2"
-              w="full"
-              key={i}
-            >
-              <Text>
-                {userId}:{projectMsg}
-              </Text>
+          {comment.length > 0 ? (
+            comment.map(({ projectMsg, userId }, i) => (
+              <CommentCard
+                key={i}
+                msg={projectMsg}
+                photo={userId.photo}
+                name={userId.name}
+              />
+            ))
+          ) : (
+            <Box>
+              <Text>no comments yet</Text>
             </Box>
-          ))}
+          )}
         </VStack>
       </Flex>
     </DashboardLayout>
