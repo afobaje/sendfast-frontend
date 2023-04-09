@@ -29,6 +29,7 @@ export default function TeamsItemCard({
   projectComment,
   projectAttendees,
   id,
+  projectCreation,
 }) {
   let navigate = useNavigate();
   let socket = useContext(Socket);
@@ -67,7 +68,6 @@ export default function TeamsItemCard({
         updateDoc(docRef, data)
           .then((ref) => console.log("successfully updated", ref))
           .catch((err) => console.log("ran into a server error", err));
-        console.log(authenticated.uid, "user info");
       }
     });
   }
@@ -84,7 +84,6 @@ export default function TeamsItemCard({
       variant="outline"
       _hover={{ cursor: "pointer", backgroundColor: "#eae6eb8c" }}
       onClick={() => enterRoom(id)}
-      // onClick={() => navigate(`/status/${id}`)}
     >
       <CardHeader>
         <Flex ml="2rem" justifyContent="space-between">
@@ -101,7 +100,9 @@ export default function TeamsItemCard({
                   {name}
                 </Heading>
 
-                <Text mt="2">38m</Text>
+                {/* <Text mt="2">
+                  {projectCreation ? projectCreation : ""}
+                </Text> */}
               </Flex>
               <Text
                 fontWeight="normal"

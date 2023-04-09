@@ -119,6 +119,7 @@ export default function Dashboard() {
 
     
 
+
   return (
     <Flex h="100vh">
       <VStack h="full" width="20vw" display={{base:'none',md:'flex'}} >
@@ -340,11 +341,13 @@ export default function Dashboard() {
                   projectParticipants,
                   projectComment,
                   projectAttendees,
+                  projectCreation
                 },
                 i
               ) => (
                 <TeamsItemCard
                   key={i}
+                  projectCreation={projectCreation}
                   projectComment={projectComment}
                   name={projectName}
                   projCategory={projectCategory}

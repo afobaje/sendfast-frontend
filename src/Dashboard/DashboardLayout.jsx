@@ -85,9 +85,7 @@ export default function DashboardLayout({ children }) {
     socket.on("joinedroom", (res) => {
       setRooms([...rooms, res]);
     });
-    // socket.on("msgToRoom", (res) => {
-    //   setComment([...comment, res]);
-    // });
+    
   }, [rooms]);
 
   function sendMessages(val) {

@@ -38,7 +38,7 @@ export default function Inbox() {
   let handleMsg = (e) => setChat({ ...chat, msg: e.target.value });
   let [userName] = usersList.filter((val) => val.uid == room);
 
-  console.log(userName, "pray for me");
+  
   function sendMsg(e, params) {
     e.preventDefault();
     socket.emit("sendMsg", params);
@@ -55,7 +55,7 @@ export default function Inbox() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
 
-  console.log("ijinle", userName);
+  
 
   return (
     <>
@@ -118,39 +118,7 @@ export default function Inbox() {
           </Flex>
         </Box>
         <Flex flex="1">
-          {/* <VStack w="20vw" pt="5" px="5" flexShrink="0">
-            {usersList.length > 0 ? (
-              usersList.map(({ photoURL, displayName }, i) => {
-                return (
-                  <Flex
-                    key={i}
-                    w="full"
-                    p="5"
-                    border="2px"
-                    borderStyle="none"
-                    borderBottomStyle="solid"
-                    mt="0"
-                    justifyContent="flex-start"
-                    borderBottomColor="blackAlpha.300"
-                    _hover={{ cursor: "pointer", backgroundColor: "#ebeaea" }}
-                  >
-                    <Circle size="40px" mr="3">
-                      <img
-                        src={photoURL}
-                        className="w-full h-full rounded-full"
-                        alt=""
-                      />
-                    </Circle>
-                    <p className="font-bold text-lg mt-2">
-                      {displayName.toUpperCase()}
-                    </p>
-                  </Flex>
-                );
-              })
-            ) : (
-              <p>no users found</p>
-            )}
-          </VStack> */}
+        
           <Flex flex="1" flexDir="column" px="2">
             <Flex>
               <Circle

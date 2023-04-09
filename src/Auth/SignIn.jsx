@@ -51,7 +51,7 @@ export default function SignIn() {
     e.preventDefault();
     createUserWithEmailAndPassword(firebaseApp, email, password)
       .then((credential) => {
-        console.log(credential.user);
+        
         toast({
           position: "top",
           title: "account created successfully",
@@ -63,7 +63,7 @@ export default function SignIn() {
         navigate("/home");
       })
       .catch((err) => {
-        console.log(err);
+        
         toast({
           position: "top",
           title: "Error creating account",
@@ -82,7 +82,7 @@ export default function SignIn() {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
         const user = result.user;
-        console.log(user);
+        
         navigate("/home");
       })
       .catch((err) => console.error(err));
@@ -95,7 +95,7 @@ export default function SignIn() {
       const credential=GithubAuthProvider.credentialFromResult(res);
       const token=credential.accessToken;
       const user=res.user
-      console.log(user,'this is github user')
+      
       navigate('/home')
     })
     .catch(err=>console.error(err))
