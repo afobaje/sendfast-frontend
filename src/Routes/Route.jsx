@@ -12,6 +12,7 @@ import Chat from "../Utils/Chat";
 import Inbox from "../Utils/Inbox";
 import ProtectedRoute from "./ProtectedRoute";
 import Profile from "../Profile/Profile";
+import AuthLogin from "./AuthLogin";
 
 export const router = createBrowserRouter([
   {
@@ -20,16 +21,24 @@ export const router = createBrowserRouter([
     errorElement: <Errorpage />,
   },
   {
-    path:'profile',
-    element:<Profile/>
+    path: "profile",
+    element: <Profile />,
   },
   {
     path: "signup",
-    element: <SignIn />,
+    element: (
+      <AuthLogin>
+        <SignIn />
+      </AuthLogin>
+    ),
   },
   {
     path: "LogIn",
-    element: <Login />,
+    element: (
+      <AuthLogin>
+        <Login />
+      </AuthLogin>
+    ),
   },
   {
     path: "chat",

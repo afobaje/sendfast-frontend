@@ -20,6 +20,10 @@ import { useNavigate } from "react-router-dom";
 import { app } from "../Authconfig/Auth";
 import { Authorized } from "../Context/AuthContext";
 import { Socket } from "../Context/SocketContext";
+import { SlLike } from "react-icons/sl";
+import { BsBookmarkDash } from "react-icons/bs";
+import { TfiComment } from "react-icons/tfi";
+// import {GoComment} from 'react-icons/go'
 
 export default function TeamsItemCard({
   name,
@@ -56,21 +60,6 @@ export default function TeamsItemCard({
   function JoinRoom(id) {
     socket.emit("createroom", id);
     console.log(projectParticipants, "whats happening");
-    // projectParticipants.length>0?projectParticipants.map((val) => {
-    //   if (val == authenticated.uid) {
-    //     return;
-    //   } else {
-    //     const data = {
-    //       projectParticipants: projectParticipants
-    //         ? [...projectParticipants, authenticated.uid]
-    //         : [],
-    //     };
-    //     const docRef = doc(db, "projects", id);
-    //     updateDoc(docRef, data)
-    //       .then((ref) => console.log("successfully updated", ref))
-    //       .catch((err) => console.log("ran into a server error", err));
-    //   }
-    // }):
 
     let group;
     if (projectParticipants.length > 0) {
@@ -179,13 +168,18 @@ export default function TeamsItemCard({
               </CircularProgress>
             )}
           </HStack>
-          <ButtonGroup justifyContent="space-evenly">
-            <Button>
-              Comment({projectComment ? projectComment.length : 0})
-            </Button>
-            <Button>Like</Button>
-            <Button>Bookmark</Button>
-          </ButtonGroup>
+          <HStack justifyContent="space-evenly" flexWrap='wrap'>
+            <div className="flex p-2 border border-solid rounded-md"> 
+              <TfiComment className="mr-1 mt-1" />
+              {projectComment ? projectComment.length : 0}
+            </div>
+            <div className="p-2 border border-solid rounded-md">
+              <SlLike />
+            </div>
+            <div className="p-2 border border-solid rounded-md">
+              <BsBookmarkDash />
+            </div>
+          </HStack>
         </VStack>
       </CardBody>
     </Card>

@@ -146,7 +146,7 @@ export default function Status() {
                     >
                       {item?.projectName}
                     </Heading>
-                    <Text mt="2">38m</Text>
+                     
                   </Flex>
                   <Text
                     fontWeight="normal"
